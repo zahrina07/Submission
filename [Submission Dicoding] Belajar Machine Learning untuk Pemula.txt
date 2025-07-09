@@ -1,0 +1,149 @@
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+
+export default function App() {
+  const [task, setTask] = useState('');
+  const [tasks, setTasks] = useState([]);
+
+  const addTask = () => {
+    if (task.trim()) {
+      setTasks([...tasks, { id: Date.now().toString(), title: task, completed: false }]);
+      setTask('');
+    }
+  };
+
+  const toggleComplete = (id) => {
+    setTasks(
+      tasks.map((t) =>
+        t.id === id ? { ...t, completed: !t.completed } : t
+      )
+    );
+  };
+
+  const deleteTask = (id) => {
+    setTasks(tasks.filter((t) => t.id !== id));
+  };
+
+  const renderItem = ({ item }) => (
+    <View style={styles.taskContainer}>
+      <TouchableOpacity onPress={() => toggleComplete(item.id)} style={styles.checkbox}>
+        <Text style={{ fontSize: 18 }}>
+          {item.completed ? '✅' : '⬜'}
+        </Text>
+      </TouchableOpacity>
+      <Text style={[styles.taskText, item.completed && styles.taskTextCompleted]}>
+        {item.title}
+      </Text>
+      <TouchableOpacity onPress={() => deleteTask(item.id)}>
+        <Text style={styles.deleteText}>🗑️</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <Text style={styles.title}>📝 To-Do List</Text>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          placeholder="Tambah tugas..."
+          style={styles.input}
+          value={task}
+          onChangeText={setTask}
+          onSubmitEditing={addTask}
+        />
+        <TouchableOpacity style={styles.addButton} onPress={addTask}>
+          <Text style={styles.addButtonText}>➕</Text>
+        </TouchableOpacity>
+      </View>
+
+      <FlatList
+        data={tasks}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id}
+        style={styles.list}
+      />
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F3F4F6',
+    paddingTop: 60,
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#111827',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
+    gap: 10,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    padding: 12,
+    borderRadius: 8,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+  },
+  addButton: {
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  addButtonText: {
+    fontSize: 24,
+    color: '#FFF',
+  },
+  list: {
+    marginTop: 10,
+  },
+  taskContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    padding: 12,
+    marginBottom: 10,
+    borderRadius: 8,
+    borderColor: '#E5E7EB',
+    borderWidth: 1,
+  },
+  taskText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#111827',
+  },
+  taskTextCompleted: {
+    textDecorationLine: 'line-through',
+    color: '#9CA3AF',
+  },
+  checkbox: {
+    marginRight: 10,
+  },
+  deleteText: {
+    fontSize: 18,
+    color: '#EF4444',
+  },
+});
